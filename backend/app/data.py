@@ -1,7 +1,16 @@
 import json, math, csv
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+def _find_root():
+    for p in [Path(__file__).resolve().parents[2], Path(__file__).resolve().parents[1], Path.cwd(), Path.cwd().parent]:
+        if (p / "datasets").exists():
+            return p
+    for p in Path(__file__).resolve().parents:
+        if (p / "datasets").exists():
+            return p
+    return Path(__file__).resolve().parents[2]
+
+ROOT = _find_root()
 NETWORK_PATH = ROOT / "datasets" / "processed" / "network.json"
 PROPOSED_PATH = ROOT / "datasets" / "raw" / "proposed.geojson"   # optional, verified data only
 GTFS_PATH = ROOT / "datasets" / "raw" / "gtfs"

@@ -6,7 +6,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from .services import NET, NodalError, OBJECTIVES
-from .data import load_proposed
+from .data import load_proposed, ROOT
 from .context import Context
 from .multimodal import Multimodal, ASSUME as MM_ASSUME, OBJECTIVES as MM_OBJ
 from .economics import economics, DEFAULTS as ECON_DEFAULTS
@@ -328,6 +328,6 @@ def provenance():
         {"layer": "Basemap", "source": "OpenFreeMap (OpenStreetMap data), Esri World Imagery, CARTO labels, AWS terrain tiles", "url": "", "date": "live", "licence": "ODbL / provider terms", "limitations": "Third-party tile services; requires internet"}]
 
 
-FRONT = Path(__file__).resolve().parents[2] / "frontend"
+FRONT = ROOT / "frontend"
 if FRONT.exists():
     app.mount("/", StaticFiles(directory=FRONT, html=True), name="frontend")
