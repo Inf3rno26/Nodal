@@ -1,8 +1,16 @@
-import json, math, csv
+import json, math, csv, os
 from pathlib import Path
 
 def _find_root():
-    for p in [Path(__file__).resolve().parents[2], Path(__file__).resolve().parents[1], Path.cwd(), Path.cwd().parent]:
+    # 1. Explicit env var (set by api/index.py on Vercel)
+    env_root = os.environ.get("NODAL_ROOT")
+    if env_root:
+        p = Path(env_root)
+        if (p / "datasets").exists():
+            return p
+    # 2. Walk up from this file
+    for p in [Path(__file__).resolve().parents[2], Path(__file__).resolve().parents[1],
+              Path(__file__).resolve().parents[0], Path.cwd(), Path.cwd().parent]:
         if (p / "datasets").exists():
             return p
     for p in Path(__file__).resolve().parents:

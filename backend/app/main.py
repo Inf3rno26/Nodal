@@ -2,7 +2,7 @@ import csv, io
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from .services import NET, NodalError, OBJECTIVES
@@ -261,7 +261,7 @@ def plan_export(sid: str, format: str = "json"):
         raise NodalError("unknown scenario")
     sc = PLAN.scenarios[sid]
     if format == "csv":
-        from fastapi.responses import PlainTextResponse as P
+        from fastapi.responses import PlainTextResponse, FileResponse, HTMLResponse as P
         buf = io.StringIO(); w = csv.writer(buf); w.writerow(["corridor", "seq", "station", "new", "lat", "lon"])
         for c in sc["corridors"]:
             for i, s in enumerate(c["stations"], 1):
@@ -329,5 +329,26 @@ def provenance():
 
 
 FRONT = ROOT / "frontend"
-if FRONT.exists():
+if not FRONT.exists():
+    FRONT = ROOT / "public"
+if not FRONT.exists() and hasattr(ROOT, "parent"):
+    if (ROOT.parent / "public").exists():
+        FRONT = ROOT.parent / "public"
+    elif (ROOT.parent / "frontend").exists():
+        FRONT = ROOT.parent / "frontend"
+
+@app.get("/", response_class=HTMLResponse)
+def read_root():
+    for candidate in [
+        FRONT / "index.html" if FRONT else None,
+        ROOT / "public" / "index.html",
+        ROOT / "frontend" / "index.html",
+        ROOT.parent / "public" / "index.html" if hasattr(ROOT, "parent") else None,
+        ROOT.parent / "frontend" / "index.html" if hasattr(ROOT, "parent") else None,
+    ]:
+        if candidate and candidate.exists():
+            return FileResponse(str(candidate))
+    return HTMLResponse("<h1>NODAL</h1><p>Frontend static files not found on disk.</p>")
+
+if FRONT and FRONT.exists():
     app.mount("/", StaticFiles(directory=FRONT, html=True), name="frontend")
