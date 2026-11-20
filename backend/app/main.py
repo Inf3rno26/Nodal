@@ -58,18 +58,6 @@ class VercelPathFixMiddleware:
 
 app.add_middleware(VercelPathFixMiddleware)
 
-@app.get("/debug_env")
-@app.get("/api/debug_env")
-def debug_env(request: Request):
-    return {
-        "url_path": request.url.path,
-        "scope_path": request.scope.get("path"),
-        "headers": dict(request.headers),
-        "root_path": request.scope.get("root_path", ""),
-        "routes": [r.path for r in app.routes if hasattr(r, "path")][:15]
-    }
-
-
 @app.exception_handler(NodalError)
 async def nodal_error(request, exc):
     from fastapi.responses import JSONResponse
