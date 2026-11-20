@@ -1,0 +1,19 @@
+name,lat,lon,kind,importance,verification
+Kempegowda International Airport,13.1986,77.7066,transport terminal,1,approximate; hand-entered; verify
+Hebbal,13.0358,77.5970,growth centre,1,approximate area centre; hand-entered
+Yelahanka,13.1007,77.5963,growth centre,1,approximate area centre; hand-entered
+Hoskote,13.0707,77.7982,growth centre,1,approximate area centre; hand-entered
+Sarjapur Road (Bellandur-Carmelaram),12.9150,77.6700,growth centre,1,approximate area centre; hand-entered
+Kanakapura Road (Kaggalipura),12.8200,77.5350,growth centre,1,approximate area centre; hand-entered
+Electronic City,12.8456,77.6603,IT park,1,approximate; hand-entered
+Whitefield ITPL,12.9857,77.7380,IT park,1,approximate; hand-entered
+Manyata Tech Park,13.0476,77.6220,IT park,1,approximate; hand-entered
+Marathahalli (Outer Ring Road),12.9569,77.7011,IT park,1,approximate area centre; hand-entered
+Koramangala,12.9352,77.6245,neighbourhood,1,approximate area centre; hand-entered
+HSR Layout,12.9116,77.6389,neighbourhood,1,approximate area centre; hand-entered
+Kalyan Nagar / Hennur,13.0280,77.6400,neighbourhood,1,approximate area centre; hand-entered
+Bannerghatta Road (IIM Bangalore),12.8952,77.6046,education,1,approximate; hand-entered
+Indian Institute of Science,13.0211,77.5667,education,1,approximate; hand-entered
+NIMHANS,12.9396,77.5948,hospital,1,approximate; hand-entered
+Bengaluru Cantonment Railway Station,12.9936,77.5985,transport terminal,1,approximate; hand-entered
+Majestic bus and rail hub,12.9757,77.5724,transport terminal,1,matches the Majestic metro station
