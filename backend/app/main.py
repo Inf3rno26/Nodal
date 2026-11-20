@@ -1,4 +1,4 @@
-import csv, io
+import csv, io, urllib.parse
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,21 +33,25 @@ class VercelPathFixMiddleware:
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http":
-            headers = dict(scope.get("headers", []))
-            matched = headers.get(b"x-matched-path") or headers.get(b"x-forwarded-uri")
-            if matched:
-                path = matched.decode("utf-8").split("?")[0]
-                scope["path"] = path
-                scope["raw_path"] = path.encode("utf-8")
-            
-            cur_path = scope.get("path", "")
-            if not cur_path.startswith("/api") and cur_path not in ("/", "/index.html", "/app.mjs", "/ext.mjs", "/trains3d.mjs") and not cur_path.startswith("/vendor"):
-                if any(cur_path == r_path.replace("/api", "") for r_path in [
-                    "/api/network", "/api/metrics", "/api/intel", "/api/proposed",
-                    "/api/route", "/api/failure", "/api/provenance"
-                ]):
-                    scope["path"] = "/api" + cur_path
-                    scope["raw_path"] = scope["path"].encode("utf-8")
+            query_bytes = scope.get("query_string", b"")
+            if b"__path__=" in query_bytes:
+                query_str = query_bytes.decode("utf-8")
+                params = urllib.parse.parse_qs(query_str, keep_blank_values=True)
+                if "__path__" in params and params["__path__"]:
+                    real_path = params["__path__"][0]
+                    scope["path"] = real_path
+                    scope["raw_path"] = real_path.encode("utf-8")
+                    del params["__path__"]
+                    new_query = urllib.parse.urlencode(params, doseq=True)
+                    scope["query_string"] = new_query.encode("utf-8")
+            else:
+                headers = dict(scope.get("headers", []))
+                matched = headers.get(b"x-matched-path") or headers.get(b"x-forwarded-uri")
+                if matched:
+                    path = matched.decode("utf-8").split("?")[0]
+                    if not path.endswith(".py"):
+                        scope["path"] = path
+                        scope["raw_path"] = path.encode("utf-8")
 
         await self.app(scope, receive, send)
 

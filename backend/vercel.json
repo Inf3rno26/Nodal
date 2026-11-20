@@ -8,7 +8,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/app/main.py"
+      "destination": "/app/main.py?__path__=/api/$1"
     }
   ]
 }
