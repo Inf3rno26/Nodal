@@ -1,0 +1,10 @@
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2
+numpy>=1.26
+scipy>=1.11
+shapely>=2.0
+pandas>=2.0   # only for scripts/build_*.py
+networkx>=3.2   # only used to verify the hand-written algorithms in tests
+pytest>=8
+httpx>=0.27
