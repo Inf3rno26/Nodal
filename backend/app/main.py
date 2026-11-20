@@ -1,6 +1,6 @@
 import csv, io
 from pathlib import Path
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +25,45 @@ def get_mm(**params):
 app = FastAPI(title="NODAL API", version="1.0",
               description="Network Optimization, Diagnostics and Analysis Lab: Namma Metro graph analytics")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+
+class VercelPathFixMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            headers = dict(scope.get("headers", []))
+            matched = headers.get(b"x-matched-path") or headers.get(b"x-forwarded-uri")
+            if matched:
+                path = matched.decode("utf-8").split("?")[0]
+                scope["path"] = path
+                scope["raw_path"] = path.encode("utf-8")
+            
+            cur_path = scope.get("path", "")
+            if not cur_path.startswith("/api") and cur_path not in ("/", "/index.html", "/app.mjs", "/ext.mjs", "/trains3d.mjs") and not cur_path.startswith("/vendor"):
+                if any(cur_path == r_path.replace("/api", "") for r_path in [
+                    "/api/network", "/api/metrics", "/api/intel", "/api/proposed",
+                    "/api/route", "/api/failure", "/api/provenance"
+                ]):
+                    scope["path"] = "/api" + cur_path
+                    scope["raw_path"] = scope["path"].encode("utf-8")
+
+        await self.app(scope, receive, send)
+
+
+app.add_middleware(VercelPathFixMiddleware)
+
+@app.get("/debug_env")
+@app.get("/api/debug_env")
+def debug_env(request: Request):
+    return {
+        "url_path": request.url.path,
+        "scope_path": request.scope.get("path"),
+        "headers": dict(request.headers),
+        "root_path": request.scope.get("root_path", ""),
+        "routes": [r.path for r in app.routes if hasattr(r, "path")][:15]
+    }
 
 
 @app.exception_handler(NodalError)
